@@ -1,57 +1,64 @@
 # Docs2Simon — Google Docs Add-on
 
-Exportuje Google Doc do EPUB a odešle ho do systému Simon přímo ze sidebaru.
+Exportuje Google Doc do EPUB a odešle ho do systému Simon přímo ze sidebaru nebo card UI.
 
-## Rychlý start
+## Architektura
 
-### 1. Prerekvizity
+Dva UI přístupy pro různé kontexty:
 
-```bash
-npm install -g @google/clasp
-clasp login
-```
+| UI | Kdy se použije | Auth token |
+|---|---|---|
+| **Sidebar** | Otevřít přes Extensions → Docs2Simon | `localStorage` prohlížeče |
+| **Card UI** | Automaticky ve workspace add-on panelu (multi-account) | `UserProperties` (server-side) |
 
-### 2. Vytvoření projektu
+### Tok exportu (Sidebar)
 
-```bash
-cd "/Users/jakubsimunek/Documents/Developement/Docs2Simon"
-clasp create --type docs --title "Docs2Simon"
-clasp push
-```
+1. OAuth token je při načtení sidebaru embedován server-side do šablony
+2. Sidebar volá Drive API přímo přes `fetch` (CORS je pro googleapis.com povolen)
+3. EPUB blob se převede na base64 a odešle přes `google.script.run` proxy (`proxyUpload`)
+4. Proxy použije `UrlFetchApp` pro POST na Simon API (obejde CORS omezení)
 
-`clasp create` přepíše `.clasp.json` se správným `scriptId`.
+### Tok exportu (Card UI)
 
-### 3. Testování
-
-V Google Apps Script editoru (script.google.com):
-- **Deploy → Test deployments → Editor Add-on**
-- Otevři libovolný Google Doc
-- **Extensions → Docs2Simon → Otevřít Docs2Simon**
-
-### 4. Nastavení Simon endpointu
-
-Otevři `Simon.gs` a nahraď `SIMON_ENDPOINT`:
-
-```javascript
-var SIMON_ENDPOINT = 'https://tvoje-adresa.simon-api.com/api/import';
-```
+1. Drive API i Simon upload jdou celé server-side přes `UrlFetchApp`
+2. Token je uložen v `UserProperties` — přežije relaci
 
 ## Struktura
 
 | Soubor | Popis |
 |--------|-------|
 | `appsscript.json` | Manifest, OAuth scopes, addOns config |
-| `Code.gs` | `onOpen()`, `showSidebar()`, `onHomepage()` |
-| `Validation.gs` | Analýza struktury dokumentu (nadpisy, page breaky) |
-| `Export.gs` | Export do EPUB přes Drive API |
-| `Simon.gs` | Simon API komunikace + správa API klíče |
-| `Sidebar.html` | Kompletní sidebar UI |
+| `Code.gs` | `onOpen()`, sidebar, card UI (`createHomepageCard`, `loginFromCard`, `exportFromCard`), server-side proxy (`proxyLogin`, `proxyUpload`) |
+| `Validation.gs` | Analýza struktury dokumentu (nadpisy H1–H6, page breaky) |
+| `Export.gs` | *(prázdný — export přesunut do klientského JS v Sidebar.html)* |
+| `Simon.gs` | *(prázdný — auth přesunuta do klientského JS + Code.gs proxy)* |
+| `Sidebar.html` | Kompletní sidebar UI (validace, login, export) |
 
-## Workflow
+## Přihlášení
 
-1. Sidebar se načte → automaticky zavolá `validateDocument()`
-2. Zobrazí název dokumentu, seznam nadpisů, strategii rozdělení
-3. Uživatel zadá API klíč → uloží se do `UserProperties` (per-user)
-4. Tlačítko "Exportovat" se odblokuje pokud: dokument je validní + API klíč je nastaven
-5. Export: Drive API → EPUB blob → POST na Simon endpoint
-6. Zobrazí se výsledek z Simon API
+Uživatel se přihlašuje jménem a heslem (Servantes účet). Token se získá z `https://app.servantes.cz/Login/TokenLogin` a uloží lokálně — není potřeba žádný ruční API klíč.
+
+## Validace dokumentu
+
+Dokument musí obsahovat alespoň jeden nadpis H1 nebo H2. Strategie rozdělení EPUB:
+- **Page breaky** — pokud dokument obsahuje manuální page breaky
+- **Nadpisy** — jinak
+
+## Nasazení přes clasp
+
+```bash
+npm install -g @google/clasp
+clasp login
+cd "/cesta/k/Docs2Simon"
+clasp create --type docs --title "Docs2Simon"
+clasp push
+```
+
+`clasp create` vygeneruje `.clasp.json` se `scriptId` (soubor je v `.gitignore`).
+
+### Testování
+
+V Google Apps Script editoru (script.google.com):
+- **Deploy → Test deployments → Editor Add-on**
+- Otevři libovolný Google Doc
+- **Extensions → Docs2Simon → Otevřít Docs2Simon**
