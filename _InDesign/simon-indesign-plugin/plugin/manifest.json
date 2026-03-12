@@ -1,0 +1,91 @@
+{
+  "id": "e716ff4f",
+  "name": "Simon",
+  "version": "0.0.6",
+  "main": "index.html",
+  "manifestVersion": 5,
+  "enableSWCSupport": true,
+  "requiredPermissions": {
+    "localFileSystem": "fullAccess",
+    "network": {
+      "domains": [
+        "https://app.servantes.cz/Login/TokenLogin",
+        "https://columbo-test.neatech.cz/Login/TokenLogin",
+        "https://localhost:44344/Login/TokenLogin",
+        "https://localhost:7135/api/Upload/ExternalSource",
+        "https://simon-test.neatech.cz/api/Upload/ExternalSource",
+        "https://simon.servantes.cz/api/Upload/ExternalSource"
+      ]
+    }
+  },
+  "host": [
+    {
+      "app": "ID",
+      "minVersion": "19.4.0"
+    }
+  ],
+  "featureFlags": {
+    "enableAlerts": true
+  },
+  "entrypoints": [
+    {
+      "type": "panel",
+      "id": "mainPanel",
+      "label": {
+        "default": "Simon Plugin"
+      },
+      "minimumSize": {
+        "width": 220,
+        "height": 210
+      },
+      "maximumSize": {
+        "width": 220,
+        "height": 210
+      },
+      "preferredDockedSize": {
+        "width": 220,
+        "height": 210
+      },
+      "preferredFloatingSize": {
+        "width": 220,
+        "height": 210
+      },
+      "icons": [
+        {
+          "width": 48,
+          "height": 48,
+          "path": "assets/images/icon_D@1x.png",
+          "scale": [1, 2, 4],
+          "theme": ["dark", "darkest"],
+          "species": ["generic"]
+        },
+        {
+          "width": 48,
+          "height": 48,
+          "path": "assets/images/icon_N@1x.png",
+          "scale": [1, 2, 4],
+          "theme": ["lightest", "light"],
+          "species": ["generic"]
+        }
+      ]
+    }
+  ],
+  "icons": [
+    {
+      "width": 48,
+      "height": 48,
+      "path": "assets/images/icon_D@1x.png",
+      "scale": [1, 2, 4],
+      "theme": ["dark", "darkest"],
+      "species": ["generic"]
+    },
+    {
+      "width": 48,
+      "height": 48,
+      "path": "assets/images/icon_N@1x.png",
+      "scale": [1, 2, 4],
+      "theme": ["lightest", "light"],
+      "species": ["generic"]
+    }
+  ]
+}

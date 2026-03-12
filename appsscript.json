@@ -1,0 +1,38 @@
+{
+  "timeZone": "Europe/Prague",
+  "addOns": {
+    "common": {
+      "name": "Docs2Simon",
+      "logoUrl": "https://drive.google.com/uc?export=view&id=1EZxXLTiQ8jP1xNHpxTY6N4L1Cwcmz2WT",
+      "homepageTrigger": {
+        "runFunction": "createHomepageCard",
+        "enabled": true
+      }
+    },
+    "docs": {}
+  },
+  "urlFetchWhitelist": [
+    "https://app.servantes.cz/",
+    "https://simon.servantes.cz/",
+    "https://www.googleapis.com/"
+  ],
+  "dependencies": {
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "Drive",
+        "serviceId": "drive",
+        "version": "v3"
+      }
+    ]
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/documents.currentonly",
+    "https://www.googleapis.com/auth/drive.readonly",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.container.ui",
+    "https://www.googleapis.com/auth/script.storage",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ]
+}

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs2Simon</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Google Sans', Roboto, system-ui, sans-serif;
+      font-size: 13px;
+      color: #202124;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: #1b2033;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header svg { flex-shrink: 0; }
+
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .content {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .section {
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 8px 12px;
+      background: #f1f3f4;
+      border-bottom: 1px solid #e0e0e0;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #5f6368;
+    }
+
+    .section-body { padding: 12px; }
+
+    /* Validation */
+    .doc-title {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #444;
+    }
+
+    .status-icon {
+      flex-shrink: 0;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      margin-top: 1px;
+    }
+
+    .status-icon.ok    { background: #e6f4ea; color: #34a853; }
+    .status-icon.error { background: #fce8e6; color: #ea4335; }
+    .status-icon.info  { background: #e8f0fe; color: #4285f4; }
+
+    .strategy-badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #e8f0fe;
+      color: #4285f4;
+    }
+
+    .headings-list {
+      margin-top: 8px;
+      border-top: 1px solid #f0f0f0;
+      padding-top: 8px;
+    }
+
+    .heading-item {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      padding: 2px 0;
+      font-size: 11px;
+      color: #444;
+    }
+
+    .heading-badge {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: #f1f3f4;
+      color: #5f6368;
+    }
+    .heading-badge.h1 { background: #e6f4ea; color: #34a853; }
+    .heading-badge.h2 { background: #e8f0fe; color: #4285f4; }
+
+    .error-message {
+      background: #fce8e6;
+      color: #c5221f;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 6px;
+    }
+
+    /* Login */
+    .login-form { display: flex; flex-direction: column; gap: 8px; }
+    .form-field { display: flex; flex-direction: column; gap: 3px; }
+    .form-field label { font-size: 11px; color: #5f6368; font-weight: 500; }
+
+    input[type="text"], input[type="password"] {
+      padding: 7px 9px;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #202124;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    input:focus { border-color: #4285f4; box-shadow: 0 0 0 2px rgba(66,133,244,0.15); }
+
+    .btn {
+      padding: 7px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-secondary { background: #f1f3f4; color: #444; }
+    .btn-secondary:hover { background: #e8eaed; }
+    .btn-danger { background: #fce8e6; color: #c5221f; }
+    .btn-danger:hover { background: #f5c6cb; }
+    .btn-primary { background: #4285f4; color: #fff; width: 100%; margin-top: 2px; }
+    .btn-primary:hover { background: #3367d6; }
+    .btn-primary:disabled { background: #dadce0; color: #9aa0a6; cursor: not-allowed; }
+
+    .logged-in-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .logged-in-user {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .user-avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4285f4, #34a853);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .login-status-msg { margin-top: 6px; font-size: 11px; display: none; }
+
+    /* Export */
+    .btn-export {
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      background: linear-gradient(135deg, #1b2033 0%, #3a4a7a 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-export:hover { opacity: 0.88; }
+    .btn-export:disabled { background: #dadce0; color: #9aa0a6; cursor: not-allowed; opacity: 1; }
+
+    .result-box {
+      margin-top: 10px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.5;
+      display: none;
+    }
+    .result-box.success { background: #e6f4ea; color: #137333; border: 1px solid #c3e6cb; }
+    .result-box.error   { background: #fce8e6; color: #c5221f; border: 1px solid #f5c6cb; }
+    .result-title { font-weight: 600; margin-bottom: 3px; }
+
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    .spinner.dark { border-color: rgba(66,133,244,0.3); border-top-color: #4285f4; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .token-warning {
+      background: #fef7e0;
+      border: 1px solid #fbbc04;
+      color: #7a5a00;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 11px;
+      margin-top: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAAb1klEQVR4nO2deZQc13Xef7eqZ58BMIOFIEgABEBwFWKaFEXKkiCABCGKipdQsk2JsWw6FunEx0eWLSV2fGIlOd4SWUmOTmhbiqQ4tuVjWTEIkHREQqBAAqTCRSJpUdxgiAKxETswg5meme567+aP2t6rqp4NMAaxcXEK06e7X9V799733e/e96paVJULMnsSzHYH/rHLBQPMslwwwCzLBQPMslwwwCzLBQPMstQAxv+2hgEUUAQLySFYSf5C9h07TeYqyYEoovH50k80eWklPqklAASLgsbXN9AuylVGuNpKsMSilymywAq9BjFWOW1hvxX2K7LXIC9bYY8qRAhG4nFFgFGwgWAVmioYBBPE44uAhgREgWKlRqRBMuKJpVOVvWEbe4IaHcok+otfK/DIyl2xAc5HEVhtRd8P8l7gZiuyRAUsikViZ9HUaUBFstexzdgFsgPYDjwKnJqloUwo55sBROCfK/pRhQ2ppyhClMyUVMk2ed9VfvqehdCoXK3C1Qr3CTKo8NfAnwA7Z2FcLeV8igH/CmSXwp9a2BB7uWATCImncPyeSQ4LWMkhU7OpHrdxpvxcCz8PsgPhUWDDLI7Tk/PBAB9A9DtKcL9FLk+x05BjaDoLci9PZoGk3/PbqLSIZ3GbjYp8Q4WvAStnYbyezKYB+oA/V+Fhi1xfUlQWwMgwv6DIsnIpzwa/DfnMQT5EIC8B//JcD9yVWTGAwA2IfMcKd6cwEys4V6QpKN/1aBfzTbGNOLEBX/nudZJzddtQ/hDhK8xSPJwNA3wIkWeNsDpXcrXnG3yIKXq+cWaGGyeqPD+ngk77BMKM8BEVeQ64+Nyq4pwbQH5RCb5mhUCzgFpQTqJIKr0459P+rJGErVdBla908I0HoCoYuE5FnhZYfk5Ukcg5M4AgP6fIH5nAx+oShOBjfmok4wTctI3ClGAnN7IkbdLkzG0nGGSZwlMCi8+VXs6NAYRbrPA/I8cbUyoJOexkr0ky2CR7rYKdmGrms6AMVdXB2Y0pnvHTNiKXoDwJdGUJ+6TDY6pfLcnMDDCNqwmyRJCHjOOledkjhx1DEb/zDLeI6bkR/TQ/jRlGnNdFWJLyuVLl58wpWKWWr011jC68TVf+/meA8JARujXz9nzwWlCICxVQTTU15fniU83sdSvPl9zQpc8dqEpZmcV+wKr+WpOAJtLysCLURTghIW0zWN6doQEEq5MfIL9phetTKElhJcXhqEQ1cw9upgyFAk4LHuxkM0cgkvz8buJmJZ8NUSHwu22Ks8nCH6jqSocHl47QKCMEjInMSJkzngECiE5wwEoN+O1cIT7suNw+xW/3vSL3dwOvdV5XZsjeOcvXz6BQyn3KZ5mg8b+vpFXUqqOhcDQIscwsDszIAJK2DLX1EXC/T/9yz3TLCy7sxIxGMjxV1zOlyGocCEvgKG1Thh3JjEZq0FZtMjYm6XVvNsKdkUDxUIHRQBhFZgQ/qRpnJDEOS6vjeitye6pcl23YEoQkSvYCZzkxK8KOH0QrShHifu4HeVMBO66h/X6Awn+Ky+D5YVBQy7AEGJFzzIISsSqIkYR25Ieq/IYPKeUM1/089TjIZ0ZVVmyLnzsl6mLAdZM1cGZTAXa8fCRLAn24MsLlRnh/PKNi+hsIDIchp4KQ8Ax0eGYsKHCToOxYbIQ7q2CnyHZSRlNUbtFgJUx34KhU9XQ8v3hOLbTxKqkO7HjxR1InCT85FtYYC2s0whrjYY1BqWHhjAxwZgUoBRNAYGuka1Eq9qNKFFiCSkWmf5PmnqKg7PlF5eO0gbLnF5WfnbNAT9Nzkl0rD8J4fUjf11ussAzYGwB1hKbGCpxpDgBnKQ8wQRSfKbComA+ZCuWbgvKtkGWyIBRhx8V5r87jQIiXAbeAnaLyizPDVMBOq7Xc0JgP1qIGEkWM25lnv66cFQMoNh6oBpcZuLE1hPgBz82IWxusNYSUs+EKKGvh+T78lWGnWK9KZusHIgkZDcJkvp+5nHENXJL/Iwwga7L6fgXsZFNcChBA2WCuoaCsyMwzJa8NTQY7HiWWYpuy51fkH+9QDTESg+HMiKcvtUSJ9wlcqvHOgUkMW/5YEAQaVuw/U4JM+S7Viz1Snd0LhYV0KW/bKHq+68Xx+z6bauX55SSLynZuKcKg+fXJljn7LPo5gd0CHczIBgrIfJDngE01AAM/bOG+Ygaa1ltKGWrp/fQISrADQtOOYjEEtb54gKp54CzMFs8o5CyrxPMrZla+Ylb2fPWu5Z4nz3xFQkbNaZpYusJ5RGocB8h08stlXRT0M4n+jCiBsA7SGKD2d0sl3YqpmJVsK/C3FeYbVcLaAqz0cbJ+mqGxIcbNaWITBB5zcRMm19BF2DHi0EMK9aKK2eLWi9TpNxIAIWNa51BzP7tH32RcLb21RY7yK6hu2hcR3Fk2kf6sr7+dkfIEJBBkkL0KzyncmFcg3dJxWSFembdQtUw7DMJIc5hL++9m2UWf5tDJr3Bk6JsMjj7JydFhrEBbG9Rq3QidgObeXNhu4sKOqxA/McvfK9abssxdQ5Qmp80pBqMxGsC8tj5Wdd3K1b1ruWnuh3lx+G/48sFfZXHnMtKNYO5502tpxbVa6S+dmQlSbE4pdQ2gCQi62RLeWHVBksZZHSUbWGFdlpyf58wGIjtKZ9sSLlv0KS5b9CnGo0McHtzK0ZHHOTr8GIONvYybOm01aK91EIS98fUTqEoH4iV2OAE18yzfYOlSSSAB4zrKYDTIUBQRBLCgfSlX9q5lde+7uabnNha1ryIVqxENRw8lR5B8bKlz4vWrrD93wQl4MG1Viz8MUdiM6O+4iitO6/L+UXGsWgiu3hT0U5WO2mKWzf8oy+Z/FKsNjpzewaGRRzkw9Bgnxl9iZPw4QQCdtRq1cA55YFcHQmIFR5lC3IAZ7+kcMyMMRkPUFTrCdhZ2XMVN/eu5vGc91/RupCPooUoijcDDdteLfYdz84kiubCUYdEIfwvsTq9Vc6zyCuhrBrnKn9a55bPZQKvp7hfWLPGG14moQiDtLJ6zgcVzNnDdxXB89CUODj/KvtOPc3T0SY6OncAIdNagozYXpYu4HJbDHyIxAdAGw+Y0Q9E4DYU57b1c1nsrV/S+l1U9G1jVfTNTYe8q+Sx3IcRUKh8v9lWxsVx/AMEWtw+xAdItyshmK/bXszKC+EqnaFkKC+TOBYsMaaoyv2sN87vWsGbhJxmNjrD39KPsG9nJgZFtHB3/AaN2kI4QumpzqAU9WMYYap7idKQEAgMdl3B93y2s6HkXq/s2Mr9txTSuTjJWP6D62O56uTjjq2Zwrv4UQZUHXI3EMSDRv4huAX7d9fwShUoiPPhUM5leWafSgbiJznSlq7aIK/t/hiv7fwarTfYN7+TNka28Mbydt8aeZ3B8iM4QFnSu4YaBW1necwur+26hXaqhZaqSw3CcuxRne/qdFHagTAiMAzuOHneDvuheK4GgRKw8LYHsV+HSIs/OoEbyzvneUDZY5jFSNe2V6STzgbSxvO8Wlvfdwlrg4Ojz7BnZzuLOG1jZu27K55lKPzyK7cCRq4tiSSR9r4wCHmxtLl49CcJOkBTZohL8ktEKqldRXignPv4UzQNmWXYd/zy1cDEr5t6BSNu01Lak63qWdF0/rTauvDS8k/3j32HDwC/SJp2lz3POXkjyyA2jhTHbrI3rlO452Fy8TsaCgNgRVB5Q7C/l5WSHR+NSzTSri1+7NDSblgI2aGUA4eVjf8j3T32XZXNXsLj3Nhb3rGPZnI10hvOnqc7JpamjvHT6G7xa386rI9/kO8PfZVHHHG6f//HSd3Pmkgfc7P1sVjhQ5FBNn4o73i+yT+BbxWvFtaCow33viSgcP2qFhW7kB9/z0wtmr/G9hbQepCTksSx9nSvp7fguQ9EPOHj0C3DsC/R1DLCwax1Le9eytO99LOi4ajLdtpQTzb28PLyV1+pPsrv+OAfH32RUobfWSX87XNq5mqrFRJf1uRsGcJSfKjnVCYUM3NWZimII/8YSqhTcMc6EOyL3vUht8LC19p6YTxd4cIFeQU7JSDrpxomJWJDVOEPoDBfSXhMsEaPmNK8PbuKlU5vorHWxoPOHWN63nqU9t7KiZy3BhFClvFF/ll0j23hlZAf7x5/hSHMQAbpr3SzsuASkDUPAsWgfTa2emy58uITCL4eXeb4WzuEXGXWza8pUklKE/6bCFkXucXcvFBMLfwr6nXSDdMqjKw3gDNJiMQS0hf3Mq8Xnb9gRDow+zevDT1MLf4/5Hau4rGcDfW0ruHHgHvpqizA6zlMnvsiRxivsGnmSA2OvMWQbdITQV+vnko6lWAIMmhzxKOL/q5dDfFKhnvLdmGggSdjE14Gj/FgHwQlge1DSdHqXZKPQEWFbENhhC72lSqTTkfSCRdjxi3itg3AaQ2wQ5yLxwBWrQoQSBD30dfTSR0CkDYaiPfzZ3s+zZu5yru+/OzvLC0MPs/nQI7xtDsztuIh50hkbVNPr2wQK4n7JJPQ4TSAj0h0UuRPFn7m1nXz8nnGckrcleMQSNqTiigGABsY/xIwY4ZG8mpjvWMtLEpK9ny9w5J+7twtNagAtbzfJY4gSqWIQjjQMP7rkp/j0NW8wr+1SAELp5OMrvs59y3+VYxE0iWEtbuNXQnNFpVtZqmdmMaFyV9+Mo/yqxR7rKN9hgQ/GruX/ywxgg/Jh4MGi5xe3kxTrQcWO5JumWhvApWnGuZZmhghpaoPvjxzl3Qvu42eXf5WqldS7lnyWn774P/CD+lFGzAiS7FgoKgRiVZjkb8t+CVkBMhXXOfxs2akae4YGg4yBPuLTlPRIIEhN5caKR21IZKCWRngv00sHJPGUdJXp419rA+Qso6qcC0iNcVvnzfpJNiz+BB9c8l9anCmWn1j0W7QH3Xz+wKdY3BHRWxsgIio4R4z9KimFLotbu6lab8gd0Sk5iz8bcl0E3xCCwVZaCACMBFXHEauyvRjhi9YuekHlBqoWCnO9P/es+AikRt0Ms3/0JD+x5D9OqvxU7ljwST6x7AscapzimDlMKG1OYHRxWVqSA1BPma1QwKPdpfFkUL1ZCag6IK0FBYYqEWGzEtxWxLliVpxfvJwhtlK+2+E468zbiLQxFJ3gcKPOh5d9jnfN/+UJzlKWdf0fo7/9Uv79nn/KqN3HRe3LaWojD6QZfk8WAzRXbqG2U4Ydl+FnizZNQR+2ROWLJBIH4VAqDxsED6fYbIhZgc0839lq7rxfDFgRrY1gSBI1yZmHSBsnmoc42qjzc8u/NG3lp/JDPe/n91c+xZiGvDm+m1A6M0MXd0MUxVtSJTeYV5qGZB9sPk4veYt1scPAkbw+5h+ZAYwG1YeVvQb5Vt7AL065ys+V7nLoiROxLIlJqF5N2jg6vp8xE/Lxy7fx9v6fn4Hqc7my62buX/UCXeFFvDH2OmHQniZFU4TG8tquO74cEQrtcth+MBtnxQGpATJKWTjinc4PZFW9LLCWK6TurmJ/YSJlExUDTQJhWvg7FR1jQef1/NY1B1nVe+v0NV4hSzuu5C+vOMjb+27ncPNAprycQlf0i1yRfhLq343vokDmcOLOIH2wSD2LNDRmQRMgtcJDFvlMaulSHcQpxuUdTT4XvK1/pXOLP4MswsLOpTx96o84PP4yJAXBdICDZowlnW/jzkWfLp1r68k/5pnT2xio9TkeLlgsi9pXsLjjMl4Zeybpi2QQ0soAVfcwpxDmGilDBnyosvBtgT2tZn8qhRWxsgi8bpHvGeFtxXt305PnVNOpGoofqKrEX2O29NYWsmt4K8+c2pIxonw3BLzVhGt7X6k0wPdGtrH5+F+zrMMN7PHrBtAT9tJfu5SGNuI+OkXGohR39bn9hCL58BMzZ716S2uWlUuyINN6i2hcoeYBC2/D6UjKod0dCDnklBdzKgeKzzYaNGkP+1kUzs/WktNcQwkw8ib9bUsqzzW3tpglHXBR+ypsOgPEV2JDGxgEcW5vre6Xz+LcbD9t547ZL8nH7aVi8aVKAijfeuMezRgmHgKn1ODQuELK7e2LmWxBJh9o4OGtwebFM0lf2wkZlUWT+k38XSN58c0QL+Pn1UmdcGa69DhjTqXyQrk25jjd64p+byL892LARFwdQOA5Az+wyIqW2xUpZ4OpJ05U9CrTPGfmeNfKFzdanasqm/boY1YWSZ2ndSmivBHMgZu0L+L2y0v2Nk8OPrHUACI7ydcVELbYkF8pZoDuoMv1oGBCA6SDsAJWfXpXLv9OXNZQJD6HSA5BLoMRt8/5Cl7Lc2Xt1VNw0fPd9/LvBZumgv+Q0tBgkiMEE7DFp6DOalGF8vMb4ib2WktMAtw2xR0ZnlFb1m/ABj6H9yHT9dKpQVB5J7dfhnZXy9IkTGEPyrPxA+0mOUhp6NSM9aQihxQWu3Dh3o1YnBnuY8OqJNLx5PtBDleSB8fiba7GuYW1KPldNQUnKVQnYwlRCWjSqDyXSux4/rhy2Clmxdn5Y4h7CGmVYZQlXhOeLAgAokRRwIMmkHut5sovpucZPSt4cZWMWWXvGETspbs2l86wDysBqCaB06F8MjVGlcKGWyaHgEBi6Bm2IxyPTrArqjOnNtryXC7Uup7v7YgjV35Km3WK9DOVZHPu5A0kvthDFu71A13VdjwpDKBafnLJ57iq72FeHfkmb9R3smdsPyrQG3bRU+tHpB1UUVHPG6vEZS6xcwQgglXDoDnJEXOMMYX5tQHWdL+Te3s28J7u97U8l19SyZXvzqZsU1qeUB5VGzwxqTIdiYNwMLUbLQUeU7WDFpnr1sj9erlfoJuIOl7UsZqLOj7BhgWf4ERzHy+PbOO1kZ28Xn+Cg403qVtDd1sbfeEA7dI7yQyIPV4IadDghDnM8WiEUGosaVvKxp6N3NS9lnd0r2NF+5UTjrO02FJgYy7fL9zq9AiBti59VkhMQ+0UMCiWURW+bkPuUs0jv7uF3cVsyCFgMhloW8p75t3De+bdQ6TjfG/kCV6v7+DFkcd4c/wVTpjDnIhgZdd4ZftxHWffOIzo6/SGfVzavpofnbuOH+5ax0096+kN5kx1jEjC3uJSS/6g2GJW7N6xmTjG5tYuUi2xAYJp3CwpPGjhrvIU9eNA2uGmQhiWd55N2Cnp4LrejVzXu5Gf5rfZM/YSL9Uf4/+cfCDB4DjXdKWphmu613DXwN1c372eNV3vmNY1XemSbsY0h1k3+/XXwL1yzLDC1uleS1SVL7520XTazFf0gIWOPDiVlR8vhAtjdpie2iKum/uzrOxez+U97+RM7o49Eb3FvNpFBIVznIiOMFBbNOPzAnx3/EV21p/ggeFN7G6+QW84L6Gs3v7OipsQwSAPoNw5nesdWf5isi9oGk/6EOW4BjxmkTvKAddPnBSlK+xnKDrCX7317+gK21jYfjmretezunst1/ZupCfsn06fGahVP9hwJsof1zF21B/nqfrj7Bjdwa7mLt5qHueS9otZWLuYUR3P4gHkmO/R0uRAZEuL4uqEIqrK/S8vnHoLVSQI7tVQPm+dzuUBN5mWBb6sBDQZY9CcYjBqgsD89sVc1rWWa3rezZre27m4ffX0RzBNORwdZPvIVp4a28lzo0/x/eY+hm2dueE8BsIFdATdSd1Jy/Ta8fzCuBuqsgQ4Pp2+HF/+QmyA//7qtCAIES5Rkb0GAtcb3DsR/Yqiu0wXoBJgNGLYnOakGWLcQn/7HC7pvIF/0r2eq3vWc233jzCzZ1CV5aWxF3h2dCePj2zj5cYL7In2A8JAuIi5YT+BtMX7iEQ9xXpZvZS93lkxe1SV26fbrxPLXkiC8PQf93EAZafCe7UEO8WOFvf6KFYNhoDOcB4X1wawItTtaV6r7+DZ09vpCju5uH0FV/esY033Om7o2cCccGDKnRu1df5vfTvPjT7BU/XH2d3YzRFzkq6wi/5wPle2X0t8f5mlCfEtqY6Ci86Tb+oqKz+JCVtkpg9/U1X+266ZPCZTf8Vq8F+VPJEr3ifgKj8iX8woL+05RTIJadoxTpqTnLR1EFjYdjGrO9/NDT1rubFnI8varyj15q3mXr5V/wZP13fy/NiT7Gnso64N5oZz6A/n0xZ0YQWamq//pYvpFJYei0pO++4GYpO3sSjLgf3T1eDJZQkEfea1GRngciT4O4gfsJeXecvKT+ODW4+JnLpOaV1BwEqAEGDUMGSHOB4dZ9TC/PYBlnWsYW3vB7i28yb2NF5j6+mHeGX8OQ5Eh0FgIFxAX9hPIO1EajNo0VThzuvq7fe+h7tVWEv6sMFs5j8vlhtmoEBOLU8haGbzZzfCg1b5MR9+8s45XpIM2i9ZFMu88Tpt8rkqhngvc3cwj+72fqwEDOswL489yzMjT9AVdjFsRgmDdvprC1ndcTVppTNCiTQq1atw+pcWIYuw41JNpfCdQo3LCPfrGTzyJC7GhdPnTwIYy49b9E4r/AtVucPDSckzZC9hKwTqrJ6Cv7Tnl4HBSmyQdulmUa2XhTWlqREDbW0IkqxyGZ8KO5Vatx/utSoJQ/JZTj/dyqpgYcjCnyt8CXh+2spzpJZdYYYi6CaQTQpvt8h9FvmIFe3OPc5Z6SrcbegaprjA4c4mdzElzkaTtaygRvxUk3w22cK1Co+bSby2Ondx9wEVz5mc6xWFL6vyv4BjTN9vS3I2n5z7bYGPWWGlFfmkQV7NC3UVtI4cksoP7SszkOL9Z66Bi+c/Ww/tczbnft3CB1W5VuCzwLGzpbSz/uhigcMgn7VwjUU+qHHnvf35LutJn/NchJ0063TjQ9ZeyhXKLL44T8ktnbOwhut+nt/7kCVfwxb5Y+AG4A5g09nWFfx9/2qEsgmRTSp6kxV+wSIfsUoGT+7qV86UcthxlZ9+xxQgwt0ab5wlxPj7DotxWFcxk80fhwwKrxr4soU/RThyJvA8FTlXvx/wDPAxhVUW+TcWXnO3eucl7HK9pQhb/uEGaf9zb4ukAzuu55vMoGCRryv8lMI1ovwBcORcKOZc/4TJIeA/o1ytyE9a2JpOe3eBo2rhI/2hhmwzVAXbidsUIKiC7WQzS6hb5AsgN6JyB0z9kfVnS2bzV5T+N/A+hZsNfMki46bC86vx2Q+4lRkseE+0cuv5Bvk7C/8aWClwH/Dtcz/8WM6H3xF7BvgF4HILv2GQXfk2d5f5+FQypZre0qHzOQ6uO49D22qRu0CuAD4DHD53w6yW88EAqewH/X1Er1S4y8K2KrZTlWTZwswoPFqtbuB/WLgZeJ8oX529IZblfDKAI/pV4DYL77TwJwaaRdhxNkIVYCf9oQh2G+TfWmQVyr3EM+28k/PUAJk8DdxjYZWF3zSw271xupAsJfFAtinyYZQrBH6POPCft3K+GwAAgX2gvwtcYeFuC9tc7LfImIp8UeBHQG4T9C85owLLuZPz7edsJxMV+AvgLyy8yyK/RuzhvwMcSL4ye72bgYjO8Kc3LsjZkf8vIOgfslwwwCzLBQPMslwwwCzLBQPMslwwwCzL/wMZGTRql/UUvgAAAABJRU5ErkJggg==" width="32" height="32" style="display:block;border-radius:6px;" />
+    <span class="header-title">Docs2Simon</span>
+  </div>
+
+  <div class="content">
+
+    <!-- Validace -->
+    <div class="section">
+      <div class="section-header">Analýza dokumentu</div>
+      <div class="section-body" id="validationBody"></div>
+    </div>
+
+    <!-- Přihlášení -->
+    <div class="section">
+      <div class="section-header">Přihlášení do Simona</div>
+      <div class="section-body">
+
+        <div id="loginForm" class="login-form">
+          <div class="form-field">
+            <label for="usernameInput">Přihlašovací jméno</label>
+            <input type="text" id="usernameInput" placeholder="jmeno@domena.cz" autocomplete="username" />
+          </div>
+          <div class="form-field">
+            <label for="passwordInput">Heslo</label>
+            <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" />
+          </div>
+          <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Přihlásit se</button>
+          <div id="loginStatusMsg" class="login-status-msg"></div>
+        </div>
+
+        <div id="loggedInBox" class="logged-in-box" style="display:none;">
+          <div class="logged-in-user">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span id="usernameLabel">—</span>
+          </div>
+          <button class="btn btn-danger" onclick="doLogout()">Odhlásit</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="section">
+      <div class="section-header">Export do Simona</div>
+      <div class="section-body">
+        <button class="btn-export" id="exportBtn" onclick="startExport()" disabled>
+          <span id="exportBtnContent">Exportovat do Simona</span>
+        </button>
+        <div id="tokenWarning" class="token-warning">
+          OAuth token pro Drive může být expirovaný (platí 1 hod.). Zavřete a znovu otevřete sidebar.
+        </div>
+        <div id="exportResult" class="result-box"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Data embedovaná server-side ──
+    var VALIDATION   = <?!= validationJson ?>;
+    var DOC_ID       = '<?!= docId ?>';
+    var DOC_NAME     = <?!= docNameJson ?>;
+    var OAUTH_TOKEN  = '<?!= oauthToken ?>';
+
+    // ── Drive export (přímý fetch — CORS OK) ──
+    var DRIVE_EXPORT_URL = 'https://www.googleapis.com/drive/v3/files/' + DOC_ID +
+                           '/export?mimeType=application%2Fepub%2Bzip&alt=media';
+
+    // ── google.script.run wrapper → Promise ──
+    function scriptRun(fnName, args) {
+      return new Promise(function(resolve, reject) {
+        var runner = google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler(function(err) { reject(new Error(err.message || String(err))); });
+        runner[fnName].apply(runner, args || []);
+      });
+    }
+
+    // ── Simon auth z localStorage ──
+    var simonToken    = localStorage.getItem('simonToken') || null;
+    var simonUsername = localStorage.getItem('simonUsername') || null;
+
+    // ── Init ──
+    window.onload = function() {
+      displayValidation(VALIDATION);
+      if (simonToken) {
+        showLoggedIn(simonUsername);
+      } else {
+        showLoginForm();
+      }
+      updateExportButton();
+    };
+
+    // ── Validace ──
+    function displayValidation(data) {
+      var body = document.getElementById('validationBody');
+      var html = '<div class="doc-title">' + esc(data.docTitle) + '</div>';
+
+      var h1h2 = data.headings.filter(function(h) {
+        return h.level === 'HEADING1' || h.level === 'HEADING2';
+      });
+
+      if (data.valid) {
+        html += statusRow('ok', '✓', 'Nalezeno <strong>' + data.headings.length + '</strong> nadpisů (' + h1h2.length + '× H1/H2)');
+      } else {
+        html += statusRow('error', '✗', 'Žádné nadpisy H1/H2');
+      }
+
+      html += statusRow(
+        data.hasPageBreaks ? 'ok' : 'info',
+        data.hasPageBreaks ? '✓' : 'i',
+        data.hasPageBreaks ? 'Page breaky detekované' : 'Žádné page breaky'
+      );
+
+      html += statusRow('info', 'i',
+        'Strategie: <span class="strategy-badge">' +
+        (data.splitStrategy === 'pageBreaks' ? 'Page breaky' : 'Nadpisy') + '</span>');
+
+      if (data.errors && data.errors.length > 0) {
+        html += '<div class="error-message">' + esc(data.errors.join(' ')) + '</div>';
+      }
+
+      if (data.headings.length > 0) {
+        html += '<div class="headings-list">';
+        data.headings.slice(0, 10).forEach(function(h) {
+          var level = h.level.replace('HEADING', 'H');
+          var cls = level === 'H1' ? 'h1' : (level === 'H2' ? 'h2' : '');
+          html += '<div class="heading-item"><span class="heading-badge ' + cls + '">' + level + '</span><span>' + esc(h.text || '(prázdný)') + '</span></div>';
+        });
+        if (data.headings.length > 10) {
+          html += '<div style="color:#5f6368;font-size:11px;margin-top:4px;">… a dalších ' + (data.headings.length - 10) + ' nadpisů</div>';
+        }
+        html += '</div>';
+      }
+
+      body.innerHTML = html;
+    }
+
+    function statusRow(cls, icon, text) {
+      return '<div class="status-row"><div class="status-icon ' + cls + '">' + icon + '</div><div>' + text + '</div></div>';
+    }
+
+    // ── Auth ──
+    function showLoggedIn(username) {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('loggedInBox').style.display = 'flex';
+      document.getElementById('usernameLabel').textContent = username || '(neznámý)';
+      document.getElementById('userAvatar').textContent = username ? username.charAt(0).toUpperCase() : '?';
+    }
+
+    function showLoginForm() {
+      document.getElementById('loggedInBox').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'flex';
+      document.getElementById('loginStatusMsg').style.display = 'none';
+    }
+
+    async function doLogin() {
+      var username = document.getElementById('usernameInput').value.trim();
+      var password = document.getElementById('passwordInput').value;
+
+      if (!username || !password) {
+        showLoginMsg('Zadejte přihlašovací jméno a heslo.', '#c5221f');
+        return;
+      }
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = 'Přihlašuji…';
+
+      try {
+        var data = await scriptRun('proxyLogin', [username, password]);
+
+        if (data.error) {
+          showLoginMsg('Chyba: ' + data.error, '#c5221f');
+          return;
+        }
+
+        if (data.Type === 'DATA') {
+          simonToken = data.Data;
+          simonUsername = decodeJwtUsername(simonToken) || username;
+          localStorage.setItem('simonToken', simonToken);
+          localStorage.setItem('simonUsername', simonUsername);
+          document.getElementById('passwordInput').value = '';
+          showLoggedIn(simonUsername);
+          updateExportButton();
+        } else {
+          showLoginMsg(loginErrorMsg(data), '#c5221f');
+        }
+      } catch (err) {
+        showLoginMsg('Chyba připojení k serveru: ' + err.message, '#c5221f');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Přihlásit se';
+      }
+    }
+
+    function doLogout() {
+      simonToken = null;
+      simonUsername = null;
+      localStorage.removeItem('simonToken');
+      localStorage.removeItem('simonUsername');
+      showLoginForm();
+      updateExportButton();
+    }
+
+    function showLoginMsg(msg, color) {
+      var el = document.getElementById('loginStatusMsg');
+      el.style.display = 'block';
+      el.style.color = color || '#202124';
+      el.textContent = msg;
+    }
+
+    function loginErrorMsg(data) {
+      if (data.Type === 'FAILED_VALIDATION') return 'Zadejte povinné údaje.';
+      if (data.Type === 'ERROR') {
+        switch (data.ErrorKey) {
+          case 'login_invalid_credentials': return 'Špatné přihlašovací jméno nebo heslo.';
+          case 'login_disabled':            return 'Tento účet nemá právo k přihlášení.';
+          case 'login_locked_out':          return 'Účet byl dočasně uzamknut. Zkuste to později.';
+        }
+      }
+      return 'Přihlášení selhalo.';
+    }
+
+    // ── Export ──
+    function updateExportButton() {
+      var btn = document.getElementById('exportBtn');
+      btn.disabled = !(simonToken && VALIDATION && VALIDATION.valid);
+    }
+
+    async function startExport() {
+      var btn = document.getElementById('exportBtn');
+      var resultEl = document.getElementById('exportResult');
+      var warningEl = document.getElementById('tokenWarning');
+
+      btn.disabled = true;
+      document.getElementById('exportBtnContent').innerHTML = '<div class="spinner"></div> Exportuji…';
+      resultEl.style.display = 'none';
+      warningEl.style.display = 'none';
+
+      try {
+        // 1. Export EPUB z Drive API (přímý fetch — CORS OK)
+        var driveResp = await fetch(DRIVE_EXPORT_URL, {
+          headers: { 'Authorization': 'Bearer ' + OAUTH_TOKEN }
+        });
+
+        if (driveResp.status === 401) {
+          warningEl.style.display = 'block';
+          throw new Error('OAuth token expiroval. Zavřete sidebar a otevřete ho znovu.');
+        }
+        if (!driveResp.ok) {
+          var errText = await driveResp.text();
+          throw new Error('EPUB export selhal (' + driveResp.status + '): ' + errText.substring(0, 200));
+        }
+
+        var epubBlob = await driveResp.blob();
+
+        // 2. Převod blob → base64 pro přenos přes proxy
+        var epubBase64 = await new Promise(function(resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function() {
+            // výsledek je "data:...;base64,XXXX" — bereme jen část za čárkou
+            resolve(reader.result.split(',')[1]);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(epubBlob);
+        });
+
+        // 3. Odeslání přes google.script.run proxy (bez CORS omezení)
+        var fileName = DOC_NAME.replace(/\.[^.]+$/, '') + '.epub';
+
+        var result = await scriptRun('proxyUpload', [epubBase64, fileName, simonToken]);
+
+        if (result.error === 'session_expired' || result.code === 401) {
+          doLogout();
+          throw new Error('Relace Simona vypršela. Přihlaste se prosím znovu.');
+        }
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        resultEl.className = 'result-box success';
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = '<div class="result-title">✓ Odesláno do Simona</div>' +
+          esc((result && result.message) ? result.message : 'Úspěšně odesláno.');
+
+      } catch (err) {
+        resultEl.className = 'result-box error';
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = '<div class="result-title">✗ Chyba při exportu</div>' + esc(err.message);
+      } finally {
+        btn.disabled = false;
+        document.getElementById('exportBtnContent').textContent = 'Exportovat do Simona';
+        updateExportButton();
+      }
+    }
+
+    // ── JWT decode ──
+    function decodeJwtUsername(token) {
+      try {
+        var payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        var decoded = JSON.parse(atob(payload));
+        return decoded.username || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // ── Utility ──
+    function esc(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && document.getElementById('loginForm').style.display !== 'none') {
+        doLogin();
+      }
+    });
+  </script>
+</body>
+</html>
